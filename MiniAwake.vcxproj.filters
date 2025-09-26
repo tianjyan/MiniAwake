@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{0b4dc91b-2d99-473c-aa6d-4c11f3f84989}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\disabled.ico">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\indefinite.ico">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\timed.ico">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
