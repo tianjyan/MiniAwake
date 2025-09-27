@@ -1,4 +1,4 @@
-name: Build MiniAwake
+name: Build and Release MiniAwake
 
 on:
   push:
@@ -27,11 +27,12 @@ jobs:
       - name: Package zip
         run: |
           mkdir output
-          copy x64\Release\MiniAwake.exe output\
-          powershell Compress-Archive -Path output\* -DestinationPath MiniAwake-${{ github.ref_name }}--x64.zip
+          copy MiniAwake\x64\Release\MiniAwake.exe output\
+          powershell Compress-Archive -Path output\* -DestinationPath MiniAwake-${{ github.ref_name }}-x64.zip
 
-      - name: Upload Release artifact
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: MiniAwake-${{ github.ref_name }}-x64
-          path: MiniAwake-${{ github.ref_name }}-x64.zip
+          files: MiniAwake-${{ github.ref_name }}-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
