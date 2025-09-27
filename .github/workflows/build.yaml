@@ -30,14 +30,12 @@ jobs:
       - name: Package zip
         run: |
           mkdir output
-          copy x64\Release\MiniAwake.exe output\
-          powershell Compress-Archive -Path output\* -DestinationPath MiniAwake-${{ github.ref_name }}-x64.zip
+          copy x64\Release\MiniAwake.exe output\MiniAwake-${{ github.ref_name }}-x64.exe
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            MiniAwake-${{ github.ref_name }}-x64.zip
-            x64/Release/MiniAwake.exe
+            MiniAwake-${{ github.ref_name }}-x64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

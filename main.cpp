@@ -2,6 +2,7 @@
 #include <shellapi.h>
 #include <thread>
 #include <atomic>
+#include <chrono>
 #include "Resource.h"  // Icon resource IDs
 
 #define ID_TRAY_APP_ICON  1001
@@ -59,7 +60,7 @@ void UpdateTrayIcon() {
 // ---------------------
 // Start keeping system awake
 // ---------------------
-void KeepAwake(int minutes, AwakeMode mode) {
+void KeepAwake(int minutes, AwakeMode mode, HWND hWnd){
     // Notify previous thread to stop
     keepAwakeRunning = false;
     currentMode = NONE;
@@ -74,19 +75,18 @@ void KeepAwake(int minutes, AwakeMode mode) {
     UpdateTrayIcon();
 
     if (minutes > 0) {
-        timerThread = std::thread([minutes]() {
-            int elapsed = 0;
-            while (elapsed < minutes * 60 && keepAwakeRunning) {
-                Sleep(1000);
-                elapsed++;
+        timerThread = std::thread([minutes, hWnd]() {
+            using namespace std::chrono;
+            auto start = steady_clock::now();
+            auto duration = duration_cast<seconds>(std::chrono::seconds(minutes));
+            auto end = start + duration;
+
+            while (keepAwakeRunning && steady_clock::now() < end) {
+                Sleep(500);
             }
-            keepAwakeRunning = false;
-            currentMode = NONE;
-            keepDisplayOn = false;
-            ApplyExecutionState();
-            UpdateTrayIcon();
-            });
-        timerThread.detach();
+
+            PostMessage(hWnd, WM_USER + 2, 0, 0);
+        });
     }
 }
 // ---------------------
@@ -163,12 +163,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             ShowTrayMenu(hWnd);
         }
         break;
+    case WM_USER + 2:
+        StopKeepAwake();
+        break;
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
-        case ID_TRAY_KEEP_30M: KeepAwake(30, MIN30); break;
-        case ID_TRAY_KEEP_1H:  KeepAwake(60, HOUR1); break;
-        case ID_TRAY_KEEP_2H:  KeepAwake(120, HOUR2); break;
-        case ID_TRAY_KEEP_INF: KeepAwake(0, INFINITE_MODE); break;
+        case ID_TRAY_KEEP_30M: KeepAwake(30, MIN30, hWnd); break;
+        case ID_TRAY_KEEP_1H:  KeepAwake(60, HOUR1, hWnd); break;
+        case ID_TRAY_KEEP_2H:  KeepAwake(120, HOUR2, hWnd); break;
+        case ID_TRAY_KEEP_INF: KeepAwake(0, INFINITE_MODE, hWnd); break;
         case ID_TRAY_STOP:     StopKeepAwake(); break;
         case ID_TRAY_DISPLAY:
             if (currentMode != NONE) {
