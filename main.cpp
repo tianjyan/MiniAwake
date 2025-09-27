@@ -78,7 +78,7 @@ void KeepAwake(int minutes, AwakeMode mode, HWND hWnd){
         timerThread = std::thread([minutes, hWnd]() {
             using namespace std::chrono;
             auto start = steady_clock::now();
-            auto duration = duration_cast<seconds>(std::chrono::seconds(minutes));
+            auto duration = duration_cast<seconds>(std::chrono::minutes(minutes));
             auto end = start + duration;
 
             while (keepAwakeRunning && steady_clock::now() < end) {
