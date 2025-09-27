@@ -27,7 +27,7 @@ jobs:
       - name: Package zip
         run: |
           mkdir output
-          copy MiniAwake\x64\Release\MiniAwake.exe output\
+          copy x64\Release\MiniAwake.exe output\
           powershell Compress-Archive -Path output\* -DestinationPath MiniAwake-${{ github.ref_name }}-x64.zip
 
       - name: Create GitHub Release
