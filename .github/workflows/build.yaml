@@ -1,0 +1,37 @@
+name: Build MiniAwake
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup Visual Studio environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Build Release x64
+        run: msbuild MiniAwake.sln /p:Configuration=Release /p:Platform=x64
+
+      - name: Package zip
+        run: |
+          mkdir output
+          copy x64\Release\MiniAwake.exe output\
+          powershell Compress-Archive -Path output\* -DestinationPath MiniAwake-${{ github.ref_name }}--x64.zip
+
+      - name: Upload Release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiniAwake-${{ github.ref_name }}-x64
+          path: MiniAwake-${{ github.ref_name }}-x64.zip

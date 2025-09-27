@@ -82,6 +82,7 @@ void KeepAwake(int minutes, AwakeMode mode) {
             }
             keepAwakeRunning = false;
             currentMode = NONE;
+            keepDisplayOn = false;
             ApplyExecutionState();
             UpdateTrayIcon();
             });
