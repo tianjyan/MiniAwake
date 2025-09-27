@@ -36,7 +36,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: 
+          files: |
             MiniAwake-${{ github.ref_name }}-x64.zip
             x64/Release/MiniAwake.exe
         env:
