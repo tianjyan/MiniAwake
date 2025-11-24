@@ -23,6 +23,10 @@ enum AwakeMode { NONE, MIN30, HOUR1, HOUR2, INFINITE_MODE };
 AwakeMode currentMode = NONE;
 bool keepDisplayOn = false;
 
+// Watchdog thread (infinite refresh)
+std::atomic<bool> watchdogRunning(false);
+std::thread watchdogThread;
+
 // Icon handles
 HICON hIconDisabled;
 HICON hIconIndefinite;
@@ -59,6 +63,25 @@ void UpdateTrayIcon() {
     Shell_NotifyIcon(NIM_MODIFY, &nid);
 }
 
+// -------------------------
+// Watchdog: infinite refresh
+// -------------------------
+void StartWatchdog() {
+    watchdogRunning = true;
+    watchdogThread = std::thread([]() {
+        while (watchdogRunning) {
+            if (keepAwakeRunning) {
+                SetThreadExecutionState(
+                    ES_CONTINUOUS |
+                    ES_SYSTEM_REQUIRED |
+                    (keepDisplayOn ? ES_DISPLAY_REQUIRED : 0)
+                );
+            }
+            Sleep(1000);
+        }
+    });
+}
+
 // ---------------------
 // Start keeping system awake
 // ---------------------
@@ -75,6 +98,10 @@ void KeepAwake(int minutes, AwakeMode mode, HWND hWnd){
     currentMode = mode;
     ApplyExecutionState();
     UpdateTrayIcon();
+
+    // Start watchdog if not yet
+    if (!watchdogThread.joinable())
+        StartWatchdog();
 
     if (minutes > 0) {
         timerThread = std::thread([minutes, hWnd]() {
@@ -105,6 +132,9 @@ void StopKeepAwake() {
     UpdateTrayIcon();
 
     if (timerThread.joinable()) timerThread.join();
+
+    watchdogRunning = false;
+    if (watchdogThread.joinable()) watchdogThread.join();
 }
 
 // ---------------------
