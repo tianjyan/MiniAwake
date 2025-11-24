@@ -30,6 +30,8 @@ HICON hIconTimed;
 
 // ---------------------
 // Unified function to apply current execution state
+// 
+// run "powercfg /requests" in cmd to check states
 // ---------------------
 void ApplyExecutionState() {
     DWORD flags = ES_CONTINUOUS;
@@ -84,6 +86,9 @@ void KeepAwake(int minutes, AwakeMode mode, HWND hWnd){
             while (keepAwakeRunning && steady_clock::now() < end) {
                 Sleep(500);
             }
+
+            if (currentMode == INFINITE_MODE)
+                return
 
             PostMessage(hWnd, WM_USER + 2, 0, 0);
         });
