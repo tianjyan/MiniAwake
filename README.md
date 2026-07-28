@@ -1,64 +1,75 @@
 # MiniAwake
 
-A lightweight system tray utility that prevents your computer from going to sleep, inspired by Microsoft PowerToys' Awake functionality.
+A lightweight system tray / menu bar utility that prevents your computer from going to sleep, inspired by Microsoft PowerToys' Awake functionality. Available for both Windows and macOS.
 
 ## Features
 
 - Keep your system awake for a specific duration (30 minutes, 1 hour, 2 hours)
 - Keep your system awake indefinitely
 - Optionally keep the display on while preventing sleep
-- Minimal memory footprint
-- Simple system tray interface
-- No installation required - just run the executable
-
-## How It Works
-
-MiniAwake uses the Windows `SetThreadExecutionState` API to prevent the system from entering sleep mode. It runs quietly in your system tray, allowing you to easily enable or disable the awake functionality with just a few clicks.
+- Minimal memory footprint (< 5MB)
+- Simple tray/menu bar interface
+- Portable — no installation required
 
 ## Usage
 
-1. Run MiniAwake.exe
+### Windows
+
+1. Run `MiniAwake.exe`
 2. Right-click the system tray icon to access the menu
-3. Select your desired awake duration:
-   - 30 minutes
-   - 1 hour
-   - 2 hours
-   - Indefinitely
-4. Optionally enable "Keep screen on" to prevent the display from turning off
+3. Select your desired awake duration
+4. Optionally enable "Keep screen on"
 5. Select "Off" to return to normal power management
 
-## System Tray Icons
+### macOS
 
-- **Disabled**: MiniAwake is not preventing sleep
-- **Timed**: MiniAwake is keeping the system awake for a specific duration
-- **Indefinite**: MiniAwake is keeping the system awake indefinitely
+1. Open `MiniAwake.app`
+2. Click the menu bar icon to access the menu
+3. Select your desired awake duration
+4. Optionally enable "Keep screen on"
+5. Select "Off" to return to normal power management
 
-## Advantages Over PowerToys Awake
+## Icons
 
-- **Standalone Application**: No need to install the entire PowerToys suite
-- **Lightweight**: Minimal memory usage and system resources
-- **Simple Interface**: Easy-to-use system tray menu
-- **Portable**: No installation required, can be run from any location
+| Icon | State |
+|------|-------|
+| Disabled | MiniAwake is not preventing sleep |
+| Timed | Keeping awake for a specific duration |
+| Indefinite | Keeping awake indefinitely |
+
+## How It Works
+
+| Platform | API |
+|----------|-----|
+| Windows | [`SetThreadExecutionState`](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadexecutionstate) with `ES_SYSTEM_REQUIRED` / `ES_DISPLAY_REQUIRED` |
+| macOS | [`IOPMAssertionCreateWithName`](https://developer.apple.com/documentation/iokit/1557134-iopmassertioncreatewithname) with `kIOPMAssertionTypePreventUserIdleSystemSleep` / `kIOPMAssertionTypePreventUserIdleDisplaySleep` |
 
 ## Requirements
 
+### Windows
 - Windows 7 or later
-- Approximately 2MB of disk space
-- Minimal RAM usage (typically less than 5MB when running)
+- ~2MB disk space
+
+### macOS
+- macOS 11 (Big Sur) or later
+- ~2MB disk space
 
 ## Building
 
-MiniAwake is built using C++ and can be compiled with Visual Studio. The project includes:
+### Windows
 
-- Main application code (`main.cpp`)
-- Resource files for icons and UI elements
-- Visual Studio project files
+Open `MiniAwake.sln` in Visual Studio and build.
 
-To build:
+### macOS
 
-1. Open `MiniAwake.sln` in Visual Studio
-2. Select your desired build configuration (Release/Debug)
-3. Build the solution
+```bash
+cd mac
+make          # Release build
+make debug    # Debug build
+make run      # Build and launch
+```
+
+The macOS build requires Xcode Command Line Tools (`xcode-select --install`).
 
 ## Contributing
 

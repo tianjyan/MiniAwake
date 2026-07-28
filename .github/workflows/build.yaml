@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
 
     steps:
@@ -37,5 +37,28 @@ jobs:
         with:
           files: |
             output/MiniAwake-${{ github.ref_name }}-x64.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build macOS app
+        run: make -C mac
+
+      - name: Package zip
+        run: |
+          cd mac
+          zip -r ../MiniAwake-${{ github.ref_name }}-mac.zip MiniAwake.app
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            MiniAwake-${{ github.ref_name }}-mac.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
