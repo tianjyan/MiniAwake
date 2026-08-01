@@ -53,14 +53,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         updateIcon()
         buildMenu()
+        updateMenuItems()
         startWatchdog()
     }
 
     func buildMenu() {
         mainMenu = NSMenu()
+        mainMenu.autoenablesItems = false
         mainMenu.delegate = self
 
         intervalSubMenu = NSMenu()
+        intervalSubMenu.autoenablesItems = false
         intervalSubMenu.delegate = self
 
         let item30m = NSMenuItem(title: "30 minutes", action: #selector(keep30m), keyEquivalent: "")
