@@ -11,8 +11,11 @@
 #define ID_TRAY_KEEP_2H   1004
 #define ID_TRAY_KEEP_INF  1005
 #define ID_TRAY_STOP      1006
-#define ID_TRAY_DISPLAY   1007
-#define ID_TRAY_EXIT      1008
+#define ID_TRAY_DISPLAY    1007
+#define ID_TRAY_EXIT       1008
+#define ID_TRAY_SCREEN_OFF 1009
+
+#define ID_TIMER_SCREEN_OFF 1
 
 NOTIFYICONDATA nid;
 HMENU hMenu;
@@ -178,6 +181,8 @@ void ShowTrayMenu(HWND hWnd) {
     displayFlags |= (keepDisplayOn ? MF_CHECKED : MF_UNCHECKED);
     displayFlags |= (currentMode == NONE ? MF_GRAYED : MF_ENABLED); // Disable in NONE mode
     AppendMenu(hMenu, displayFlags, ID_TRAY_DISPLAY, TEXT("Keep screen on"));
+    UINT screenOffFlags = MF_STRING | (keepDisplayOn ? MF_GRAYED : MF_ENABLED);
+    AppendMenu(hMenu, screenOffFlags, ID_TRAY_SCREEN_OFF, TEXT("Turn off screen"));
 
     AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
     AppendMenu(hMenu, MF_STRING, ID_TRAY_EXIT, TEXT("Exit"));
@@ -201,6 +206,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
     case WM_USER + 2:
         StopKeepAwake();
         break;
+    case WM_TIMER:
+        if (wParam == ID_TIMER_SCREEN_OFF) {
+            KillTimer(hWnd, ID_TIMER_SCREEN_OFF);
+            SendMessage(hWnd, WM_SYSCOMMAND, SC_MONITORPOWER, (LPARAM)2);
+        }
+        break;
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
         case ID_TRAY_KEEP_30M: KeepAwake(30, MIN30, hWnd); break;
@@ -213,6 +224,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 keepDisplayOn = !keepDisplayOn;
                 ApplyExecutionState();
                 UpdateTrayIcon();
+            }
+            break;
+        case ID_TRAY_SCREEN_OFF:
+            if (!keepDisplayOn) {
+                // Delay briefly so the menu click release does not immediately wake the display
+                SetTimer(hWnd, ID_TIMER_SCREEN_OFF, 300, NULL);
             }
             break;
         case ID_TRAY_EXIT:

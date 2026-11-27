@@ -36,6 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case keepInfinite
         case stop
         case displayToggle
+        case turnOffScreen
         case exit
     }
 
@@ -102,6 +103,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         displayItem.target = self
         displayItem.tag = MenuTag.displayToggle.rawValue
         mainMenu.addItem(displayItem)
+
+        let screenOffItem = NSMenuItem(title: "Turn off screen", action: #selector(turnOffScreen), keyEquivalent: "")
+        screenOffItem.target = self
+        screenOffItem.tag = MenuTag.turnOffScreen.rawValue
+        mainMenu.addItem(screenOffItem)
 
         mainMenu.addItem(NSMenuItem.separator())
 
@@ -191,6 +197,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             displayItem.isEnabled = (awakeMode != .none)
             displayItem.state = keepDisplayOn ? .on : .off
         }
+        if let screenOffItem = mainMenu.item(withTag: MenuTag.turnOffScreen.rawValue) {
+            screenOffItem.isEnabled = !keepDisplayOn
+        }
     }
 
     func keepAwake(minutes: Int, mode: AwakeMode) {
@@ -239,6 +248,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         updateMenuItems()
     }
 
+    @objc func turnOffScreen() {
+        guard !keepDisplayOn else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            let task = Process()
+            task.launchPath = "/usr/bin/pmset"
+            task.arguments = ["displaysleepnow"]
+            try? task.run()
+        }
+    }
+
     @objc func exitApp() {
         stopAwake()
         watchdogTimer?.invalidate()
@@ -279,6 +298,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if let displayItem = mainMenu.item(withTag: MenuTag.displayToggle.rawValue) {
                 displayItem.state = keepDisplayOn ? .on : .off
                 displayItem.isEnabled = (awakeMode != .none)
+            }
+            if let screenOffItem = mainMenu.item(withTag: MenuTag.turnOffScreen.rawValue) {
+                screenOffItem.isEnabled = !keepDisplayOn
             }
         }
     }
